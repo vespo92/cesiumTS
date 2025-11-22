@@ -1,5 +1,3 @@
-import defined from "./defined.js";
-
 /**
  * Constructs an exception object that is thrown due to a developer error, e.g., invalid argument,
  * argument out of range, etc.  This exception should only be thrown during development;
@@ -10,66 +8,70 @@ import defined from "./defined.js";
  * be thrown at runtime, e.g., out of memory, that the calling code should be prepared
  * to catch.
  *
- * @alias DeveloperError
- * @constructor
  * @extends Error
  *
- * @param {string} [message] The error message for this exception.
+ * @param message - The error message for this exception.
  *
  * @see RuntimeError
  */
-function DeveloperError(message: any) {
+class DeveloperError extends Error {
   /**
    * 'DeveloperError' indicating that this exception was thrown due to a developer error.
-   * @type {string}
    * @readonly
    */
-  this.name = "DeveloperError";
+  override readonly name: string = "DeveloperError";
 
   /**
    * The explanation for why this exception was thrown.
-   * @type {string}
    * @readonly
    */
-  this.message = message;
-
-  //Browsers such as IE don't have a stack property until you actually throw the error.
-  let stack;
-  try {
-    throw new Error();
-  } catch (e) {
-    stack = e.stack;
-  }
+  override readonly message: string;
 
   /**
    * The stack trace of this exception, if available.
-   * @type {string}
    * @readonly
    */
-  this.stack = stack;
-}
+  override readonly stack?: string;
 
-if (defined(Object.create)) {
-  DeveloperError.prototype = Object.create(Error.prototype);
-  DeveloperError.prototype.constructor = DeveloperError;
-}
+  constructor(message?: string) {
+    super(message);
 
-DeveloperError.prototype.toString = function () {
-  let str = `${this.name}: ${this.message}`;
+    this.message = message ?? "";
 
-  if (defined(this.stack)) {
-    str += `\n${this.stack.toString()}`;
+    // Maintains proper stack trace for where our error was thrown (only available on V8)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, DeveloperError);
+    }
+
+    // Set the prototype explicitly for proper instanceof checks
+    Object.setPrototypeOf(this, DeveloperError.prototype);
   }
 
-  return str;
-};
+  /**
+   * Returns a string representation of this error.
+   * @returns The string representation.
+   */
+  override toString(): string {
+    let str = `${this.name}: ${this.message}`;
 
-/**
- * @private
- */
-DeveloperError.throwInstantiationError = function () {
-  throw new DeveloperError(
-    "This function defines an interface and should not be called directly.",
-  );
-};
+    if (this.stack !== undefined) {
+      str += `\n${this.stack}`;
+    }
+
+    return str;
+  }
+
+  /**
+   * Throws a DeveloperError indicating that a function defines an interface
+   * and should not be called directly.
+   * @throws {DeveloperError} Always throws.
+   * @private
+   */
+  static throwInstantiationError(): never {
+    throw new DeveloperError(
+      "This function defines an interface and should not be called directly."
+    );
+  }
+}
+
 export default DeveloperError;

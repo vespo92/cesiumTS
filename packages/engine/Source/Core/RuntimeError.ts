@@ -1,5 +1,3 @@
-import defined from "./defined.js";
-
 /**
  * Constructs an exception object that is thrown due to an error that can occur at runtime, e.g.,
  * out of memory, could not compile shader, etc.  If a function may throw this
@@ -9,57 +7,54 @@ import defined from "./defined.js";
  * to a developer error, e.g., invalid argument, that usually indicates a bug in the
  * calling code.
  *
- * @alias RuntimeError
- * @constructor
  * @extends Error
  *
- * @param {string} [message] The error message for this exception.
+ * @param message - The error message for this exception.
  *
  * @see DeveloperError
  */
-function RuntimeError(message: any) {
+class RuntimeError extends Error {
   /**
    * 'RuntimeError' indicating that this exception was thrown due to a runtime error.
-   * @type {string}
    * @readonly
    */
-  this.name = "RuntimeError";
+  override readonly name: string = "RuntimeError";
 
   /**
    * The explanation for why this exception was thrown.
-   * @type {string}
    * @readonly
    */
-  this.message = message;
-
-  //Browsers such as IE don't have a stack property until you actually throw the error.
-  let stack;
-  try {
-    throw new Error();
-  } catch (e) {
-    stack = e.stack;
-  }
+  override readonly message: string;
 
   /**
    * The stack trace of this exception, if available.
-   * @type {string}
    * @readonly
    */
-  this.stack = stack;
-}
+  override readonly stack?: string;
 
-if (defined(Object.create)) {
-  RuntimeError.prototype = Object.create(Error.prototype);
-  RuntimeError.prototype.constructor = RuntimeError;
-}
+  constructor(message?: string) {
+    super(message);
 
-RuntimeError.prototype.toString = function () {
-  let str = `${this.name}: ${this.message}`;
+    this.message = message ?? "";
 
-  if (defined(this.stack)) {
-    str += `\n${this.stack.toString()}`;
+    // Maintains proper stack trace for where error was thrown (only available on V8)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, RuntimeError);
+    }
+
+    // Ensure prototype chain is properly set up for instanceof checks
+    Object.setPrototypeOf(this, RuntimeError.prototype);
   }
 
-  return str;
-};
+  override toString(): string {
+    let str = `${this.name}: ${this.message}`;
+
+    if (this.stack !== undefined) {
+      str += `\n${this.stack}`;
+    }
+
+    return str;
+  }
+}
+
 export default RuntimeError;
