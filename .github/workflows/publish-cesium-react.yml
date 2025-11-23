@@ -1,0 +1,45 @@
+name: Publish @vespo92/cesium-react
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    # Only run for cesium-react releases or manual dispatch
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'cesium-react-v')
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js with GitHub Packages
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@vespo92'
+
+      - name: Install dependencies
+        working-directory: packages/cesium-react
+        run: bun install
+
+      - name: Build package
+        working-directory: packages/cesium-react
+        run: bun run build
+
+      - name: Publish to GitHub Packages
+        working-directory: packages/cesium-react
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

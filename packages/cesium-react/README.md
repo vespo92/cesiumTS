@@ -1,19 +1,37 @@
-# @cesiumts/react
+# @vespo92/cesium-react
 
 A React component library for CesiumJS - providing easy-to-use React components for 3D globe visualization.
 
 ## Installation
 
+### From GitHub Packages (recommended)
+
+First, configure npm to use GitHub Packages for the `@vespo92` scope. Add to your project's `.npmrc`:
+
+```
+@vespo92:registry=https://npm.pkg.github.com
+```
+
+Then install:
+
 ```bash
-npm install @cesiumts/react cesium
+npm install @vespo92/cesium-react cesium
 # or
-bun add @cesiumts/react cesium
+bun add @vespo92/cesium-react cesium
+```
+
+### From Git (alternative)
+
+```bash
+npm install github:vespo92/cesiumTS#main --workspace-package=packages/cesium-react cesium
+# or directly reference the package
+npm install "github:vespo92/cesiumTS#main&path:packages/cesium-react" cesium
 ```
 
 ## Quick Start
 
 ```tsx
-import { CesiumViewer } from '@cesiumts/react';
+import { CesiumViewer } from '@vespo92/cesium-react';
 
 function App() {
   return (
@@ -50,7 +68,7 @@ Access the viewer instance and helper methods via ref:
 
 ```tsx
 import { useRef } from 'react';
-import { CesiumViewer, CesiumViewerRef } from '@cesiumts/react';
+import { CesiumViewer, CesiumViewerRef } from '@vespo92/cesium-react';
 
 function App() {
   const viewerRef = useRef<CesiumViewerRef>(null);
@@ -85,7 +103,7 @@ For Next.js, use dynamic import to avoid SSR issues:
 import dynamic from 'next/dynamic';
 
 const CesiumViewer = dynamic(
-  () => import('@cesiumts/react').then((mod) => mod.CesiumViewer),
+  () => import('@vespo92/cesium-react').then((mod) => mod.CesiumViewer),
   { ssr: false }
 );
 ```
