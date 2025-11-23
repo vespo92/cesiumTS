@@ -3,24 +3,32 @@
  * to the given proxy URL.
  *
  * @alias DefaultProxy
- * @constructor
- * @extends {Proxy}
- *
- * @param {string} proxy The proxy URL that will be used to requests all resources.
+ * @extends Proxy
  */
-function DefaultProxy(proxy: any) {
-  this.proxy = proxy;
-}
+class DefaultProxy {
+  /**
+   * The proxy URL that will be used to request all resources.
+   */
+  proxy: string;
 
-/**
- * Get the final URL to use to request a given resource.
- *
- * @param {string} resource The resource to request.
- * @returns {string} proxied resource
- */
-DefaultProxy.prototype.getURL = function (resource) {
-  const prefix = this.proxy.indexOf("?") === -1 ? "?" : "";
-  return this.proxy + prefix + encodeURIComponent(resource);
-};
+  /**
+   * Creates a new DefaultProxy.
+   * @param proxy - The proxy URL that will be used to request all resources.
+   */
+  constructor(proxy: string) {
+    this.proxy = proxy;
+  }
+
+  /**
+   * Get the final URL to use to request a given resource.
+   *
+   * @param resource - The resource to request.
+   * @returns The proxied resource URL.
+   */
+  getURL(resource: string): string {
+    const prefix = this.proxy.indexOf("?") === -1 ? "?" : "";
+    return this.proxy + prefix + encodeURIComponent(resource);
+  }
+}
 
 export default DefaultProxy;
