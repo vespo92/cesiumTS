@@ -10,17 +10,20 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
-    "src"
+    "src",
+    "README.md"
   ],
   "scripts": {
-    "build": "bun run build.ts",
+    "build": "bun run build.ts && bunx tsc --declaration --emitDeclarationOnly --outDir dist",
     "dev": "bun run build.ts --watch",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prepublishOnly": "bun run build"
   },
   "peerDependencies": {
     "cesium": ">=1.100.0",

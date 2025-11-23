@@ -1,0 +1,28 @@
+# Source files (keep for development reference)
+# src/
+
+# Build artifacts that should be included
+# !dist/
+
+# Development files
+node_modules/
+*.log
+.DS_Store
+
+# Test files
+__tests__/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Build config (not needed for consumers)
+build.ts
+tsconfig.json
+
+# Documentation (README is kept)
+docs/
+
+# Git files
+.git/
+.gitignore
