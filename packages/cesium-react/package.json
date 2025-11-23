@@ -1,0 +1,61 @@
+{
+  "name": "@cesiumts/react",
+  "version": "1.0.0",
+  "description": "React components for CesiumJS - 3D globe visualization",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "bun run build.ts",
+    "dev": "bun run build.ts --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "cesium": ">=1.100.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "bun-types": "latest",
+    "cesium": "^1.119.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "cesium",
+    "cesiumjs",
+    "react",
+    "3d",
+    "globe",
+    "map",
+    "gis",
+    "geospatial",
+    "typescript"
+  ],
+  "author": "Vincent Esposito",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vespo92/cesiumTS.git",
+    "directory": "packages/cesium-react"
+  },
+  "bugs": {
+    "url": "https://github.com/vespo92/cesiumTS/issues"
+  },
+  "homepage": "https://github.com/vespo92/cesiumTS/tree/main/packages/cesium-react#readme"
+}
