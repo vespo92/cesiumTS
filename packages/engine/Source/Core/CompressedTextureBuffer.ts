@@ -3,117 +3,108 @@ import defined from "./defined.js";
 /**
  * Describes a compressed texture and contains a compressed texture buffer.
  * @alias CompressedTextureBuffer
- * @constructor
- *
- * @param {PixelFormat} internalFormat The pixel format of the compressed texture.
- * @param {PixelDatatype} pixelDatatype The pixel datatype of the compressed texture.
- * @param {number} width The width of the texture.
- * @param {number} height The height of the texture.
- * @param {Uint8Array} buffer The compressed texture buffer.
  */
-function CompressedTextureBuffer(internalFormat: any, pixelDatatype: any, width: any, height: any, buffer: any, ) {
-  this._format = internalFormat;
-  this._datatype = pixelDatatype;
-  this._width = width;
-  this._height = height;
-  this._buffer = buffer;
-}
+class CompressedTextureBuffer {
+  private _format: number;
+  private _datatype: number;
+  private _width: number;
+  private _height: number;
+  private _buffer: Uint8Array;
 
-Object.defineProperties(CompressedTextureBuffer.prototype, {
   /**
-   * The format of the compressed texture.
-   * @type {PixelFormat}
-   * @readonly
-   * @memberof CompressedTextureBuffer.prototype
+   * Creates a new CompressedTextureBuffer.
+   * @param internalFormat - The pixel format of the compressed texture.
+   * @param pixelDatatype - The pixel datatype of the compressed texture.
+   * @param width - The width of the texture.
+   * @param height - The height of the texture.
+   * @param buffer - The compressed texture buffer.
    */
-  internalFormat: {
-    get: function () {
-      return this._format;
-    },
-  },
-  /**
-   * The datatype of the compressed texture.
-   * @type {PixelDatatype}
-   * @readonly
-   * @memberof CompressedTextureBuffer.prototype
-   */
-  pixelDatatype: {
-    get: function () {
-      return this._datatype;
-    },
-  },
-  /**
-   * The width of the texture.
-   * @type {number}
-   * @readonly
-   * @memberof CompressedTextureBuffer.prototype
-   */
-  width: {
-    get: function () {
-      return this._width;
-    },
-  },
-  /**
-   * The height of the texture.
-   * @type {number}
-   * @readonly
-   * @memberof CompressedTextureBuffer.prototype
-   */
-  height: {
-    get: function () {
-      return this._height;
-    },
-  },
-  /**
-   * The compressed texture buffer.
-   * @type {Uint8Array}
-   * @readonly
-   * @memberof CompressedTextureBuffer.prototype
-   */
-  bufferView: {
-    get: function () {
-      return this._buffer;
-    },
-  },
-  /**
-   * The compressed texture buffer. Alias for bufferView.
-   * @type {Uint8Array}
-   * @readonly
-   * @memberof CompressedTextureBuffer.prototype
-   */
-  arrayBufferView: {
-    get: function () {
-      return this._buffer;
-    },
-  },
-});
-
-/**
- * Creates a shallow clone of a compressed texture buffer.
- *
- * @param {CompressedTextureBuffer} object The compressed texture buffer to be cloned.
- * @return {CompressedTextureBuffer} A shallow clone of the compressed texture buffer.
- */
-CompressedTextureBuffer.clone = function (object) {
-  if (!defined(object)) {
-    return undefined;
+  constructor(
+    internalFormat: number,
+    pixelDatatype: number,
+    width: number,
+    height: number,
+    buffer: Uint8Array,
+  ) {
+    this._format = internalFormat;
+    this._datatype = pixelDatatype;
+    this._width = width;
+    this._height = height;
+    this._buffer = buffer;
   }
 
-  return new CompressedTextureBuffer(
-    object._format,
-    object._datatype,
-    object._width,
-    object._height,
-    object._buffer,
-  );
-};
+  /**
+   * The format of the compressed texture.
+   */
+  get internalFormat(): number {
+    return this._format;
+  }
 
-/**
- * Creates a shallow clone of this compressed texture buffer.
- *
- * @return {CompressedTextureBuffer} A shallow clone of the compressed texture buffer.
- */
-CompressedTextureBuffer.prototype.clone = function () {
-  return CompressedTextureBuffer.clone(this);
-};
+  /**
+   * The datatype of the compressed texture.
+   */
+  get pixelDatatype(): number {
+    return this._datatype;
+  }
+
+  /**
+   * The width of the texture.
+   */
+  get width(): number {
+    return this._width;
+  }
+
+  /**
+   * The height of the texture.
+   */
+  get height(): number {
+    return this._height;
+  }
+
+  /**
+   * The compressed texture buffer.
+   */
+  get bufferView(): Uint8Array {
+    return this._buffer;
+  }
+
+  /**
+   * The compressed texture buffer. Alias for bufferView.
+   */
+  get arrayBufferView(): Uint8Array {
+    return this._buffer;
+  }
+
+  /**
+   * Creates a shallow clone of a compressed texture buffer.
+   *
+   * @param object - The compressed texture buffer to be cloned.
+   * @returns A shallow clone of the compressed texture buffer.
+   */
+  static clone(
+    object: CompressedTextureBuffer | undefined,
+  ): CompressedTextureBuffer | undefined {
+    if (!defined(object)) {
+      return undefined;
+    }
+
+    return new CompressedTextureBuffer(
+      object!._format,
+      object!._datatype,
+      object!._width,
+      object!._height,
+      object!._buffer,
+    );
+  }
+
+  /**
+   * Creates a shallow clone of this compressed texture buffer.
+   *
+   * @returns A shallow clone of the compressed texture buffer.
+   */
+  clone(): CompressedTextureBuffer | undefined {
+    return CompressedTextureBuffer.clone(this);
+  }
+}
+
 export default CompressedTextureBuffer;
