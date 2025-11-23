@@ -1,16 +1,26 @@
+import type { BuildResult, BuildContext, OutputFile } from "esbuild";
+import type { Application, Request, Response, NextFunction } from "express";
 import ContextCache from "./ContextCache.js";
 import path from "path";
 
-function formatTimeSinceInSeconds(start) {
+function formatTimeSinceInSeconds(start: number): number {
   return Math.ceil((performance.now() - start) / 100) / 10;
 }
 
-function serveResult(result, fileName, res, next) {
-  let bundle, error;
+function serveResult(
+  result: BuildResult | undefined,
+  fileName: string,
+  res: Response,
+  next: NextFunction,
+): void {
+  let bundle: string | undefined;
+  let error: unknown;
   try {
-    for (const out of result.outputFiles) {
-      if (path.basename(out.path) === fileName) {
-        bundle = out.text;
+    if (result?.outputFiles) {
+      for (const out of result.outputFiles) {
+        if (path.basename(out.path) === fileName) {
+          bundle = out.text;
+        }
       }
     }
   } catch (e) {
@@ -31,15 +41,21 @@ function serveResult(result, fileName, res, next) {
   res.send(bundle);
 }
 
-function createRoute(app, name, route, context, dependantCaches) {
+function createRoute(
+  app: Application,
+  name: string,
+  route: string,
+  context: BuildContext,
+  dependantCaches?: ContextCache[],
+): ContextCache {
   const cache = new ContextCache(context);
-  app.get(route, async function (req, res, next) {
+  app.get(route, async function (req: Request, res: Response, next: NextFunction) {
     const fileName = path.basename(req.originalUrl);
 
     // Multiple files may be requested at this path, calling this function in quick succession.
     // Await the previous build before re-building again.
     try {
-      await cache.promise;
+      await cache.rebuild();
     } catch {
       // Error is reported upstream
     }
@@ -53,6 +69,7 @@ function createRoute(app, name, route, context, dependantCaches) {
               if (!dependantCache.isBuilt()) {
                 return dependantCache.rebuild();
               }
+              return Promise.resolve();
             }),
           );
         }
@@ -65,7 +82,8 @@ function createRoute(app, name, route, context, dependantCaches) {
       }
     }
 
-    return serveResult(cache.result, fileName, res, next);
+    const result = await cache.rebuild();
+    return serveResult(result, fileName, res, next);
   });
 
   return cache;

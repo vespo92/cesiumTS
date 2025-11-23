@@ -20,7 +20,12 @@ const defaultThumbnailPath = "images/placeholder-thumbnail.jpg";
 const requiredMetadataKeys = ["title", "description"];
 const galleryItemConfig = /sandcastle\.(yml|yaml)/;
 
-async function createPagefindIndex() {
+interface PagefindIndex {
+  addHTMLFile: (args: { url: string; content: string }) => Promise<unknown>;
+  writeFiles: (args: { outputPath: string }) => Promise<unknown>;
+}
+
+async function createPagefindIndex(): Promise<PagefindIndex> {
   try {
     const { index } = await pagefind.createIndex({
       verbose: true,
@@ -31,13 +36,14 @@ async function createPagefindIndex() {
       throw new Error("Missing index output.");
     }
 
-    return index;
+    return index as unknown as PagefindIndex;
   } catch (error) {
-    throw new Error(`Could not create search index. ${error.message}`);
+    const err = error as Error;
+    throw new Error(`Could not create search index. ${err.message}`);
   }
 }
 
-async function exists(path) {
+async function exists(path: string): Promise<boolean> {
   try {
     await access(path);
     return true;
@@ -46,28 +52,41 @@ async function exists(path) {
   }
 }
 
-/**
- * @typedef {Record<string, string | string[]> | null} GalleryFilter
- */
+type GalleryFilter = Record<string, string | string[]> | null;
 
-/**
- * @typedef {object} BuildGalleryOptions
- * @property {string} [rootDirectory = ".."] The root directory to which all other paths are relative.
- * @property {string} [publicDirectory = "./public"] The static directory where the gallery list and search index will be written.
- * @property {string[]} [galleryFiles] The glob pattern(s) to find gallery yaml files.
- * @property {string} [sourceUrl=""] The source code repository URL corresponding to the root directory of the gallery files.
- * @property {string} [defaultThumbnail = "images/placeholder-thumbnail.jpg"] The default thumbnail image to use if not is specified in the gallery yaml file.
- * @property {Pagefind.SearchOptions} [searchOptions={}] The search options to use when initializing Pagefind.
- * @property {GalleryFilter} [defaultFilters=null] The default filter option to use, e.g., { "label" : "Showcases"}.
- * @property {Record<string, any>} [metadata={}] A map of metadata to pass through to pagefind, and their default if unspecified.
- * @property {boolean} [includeDevelopment = true] Whether to include sandcastles marked as development.
- */
+interface GalleryListItem {
+  url: string;
+  id: string;
+  title: string;
+  thumbnail: string;
+  sourceUrl: string;
+  lineCount: number;
+  description: string;
+  labels: string[];
+}
 
-/**
- * @param {BuildGalleryOptions} [options] The build options.
- * @returns
- */
-export async function buildGalleryList(options = {}) {
+interface GalleryList {
+  entries: GalleryListItem[];
+  legacyIds: Record<string, string>;
+  searchOptions: Record<string, unknown>;
+  defaultFilters: GalleryFilter;
+}
+
+interface BuildGalleryOptions {
+  rootDirectory?: string;
+  publicDirectory?: string;
+  galleryFiles?: string[];
+  sourceUrl?: string;
+  defaultThumbnail?: string;
+  searchOptions?: Record<string, unknown>;
+  defaultFilters?: GalleryFilter;
+  metadata?: Record<string, unknown>;
+  includeDevelopment?: boolean;
+}
+
+export async function buildGalleryList(
+  options: BuildGalleryOptions = {},
+): Promise<GalleryList> {
   const rootDirectory = options.rootDirectory ?? defaultRootDirectory;
   const publicDirectory = options.publicDirectory ?? defaultPublicDirectory;
   const galleryFilesPattern = options.galleryFiles ?? defaultGalleryFiles;
@@ -80,37 +99,15 @@ export async function buildGalleryList(options = {}) {
 
   const pagefindIndex = await createPagefindIndex();
 
-  /**
-   * @typedef GalleryListItem
-   * @property {string} url
-   * @property {string} id
-   * @property {string} title
-   * @property {string} thumbnail
-   * @property {number} lineCount
-   * @property {string} description
-   * @property {string[]} labels
-   */
-
-  /**
-   * @typedef GalleryList
-   * @property {GalleryListItem[]} entries
-   * @property {Record<string, string>} legacyIds
-   * @property {Pagefind.SearchOptions} searchOptions
-   * @property {GalleryFilter} defaultFilters
-   */
-
-  /**
-   * @type {GalleryList}
-   */
-  const output = {
+  const output: GalleryList = {
     entries: [],
     legacyIds: {},
     searchOptions,
     defaultFilters,
   };
 
-  const errors = [];
-  const check = (condition, messageIfTrue) => {
+  const errors: Error[] = [];
+  const check = (condition: boolean, messageIfTrue: string): boolean => {
     if (condition) {
       errors.push(new Error(messageIfTrue));
     }
@@ -118,21 +115,24 @@ export async function buildGalleryList(options = {}) {
   };
 
   const galleryFiles = await globby(
-    galleryFilesPattern.map((pattern) => join(rootDirectory, pattern, "**/*")),
+    galleryFilesPattern.map((pattern: string) =>
+      join(rootDirectory, pattern, "**/*"),
+    ),
   );
-  const yamlFiles = galleryFiles.filter((path) =>
+  const yamlFiles = galleryFiles.filter((path: string) =>
     basename(path).match(galleryItemConfig),
   );
 
   for (const filePath of yamlFiles) {
-    let metadata;
+    let metadata: Record<string, unknown> | undefined;
 
     try {
       const file = await readFile(filePath, "utf-8");
-      metadata = parse(file);
+      metadata = parse(file) as Record<string, unknown> | undefined;
     } catch (error) {
+      const err = error as Error;
       errors.push(
-        new Error(`Could not read file "${filePath}: ${error.message}"`),
+        new Error(`Could not read file "${filePath}: ${err.message}`),
       );
       continue;
     }
@@ -167,7 +167,16 @@ export async function buildGalleryList(options = {}) {
     const galleryBase = join(rootDirectory, relativePath);
 
     const { title, description, legacyId, thumbnail, labels, development } =
-      metadata;
+      metadata as {
+        title?: string;
+        description?: string;
+        legacyId?: string;
+        thumbnail?: string;
+        labels?: string[];
+        development?: boolean;
+      };
+
+    const labelsArray = labels ?? [];
 
     // Validate metadata
 
@@ -176,7 +185,7 @@ export async function buildGalleryList(options = {}) {
       check(!title, `${slug} - Missing title`) ||
       check(!description, `${slug} - Missing description`) ||
       check(
-        !development && labels.includes("Development"),
+        !development && labelsArray.includes("Development"),
         `${slug} has Development label but not marked as development sandcastle`,
       )
     ) {
@@ -213,8 +222,8 @@ export async function buildGalleryList(options = {}) {
       continue;
     }
 
-    if (development && !labels.includes("Development")) {
-      labels.push("Development");
+    if (development && !labelsArray.includes("Development")) {
+      labelsArray.push("Development");
     }
 
     if (legacyId) {
@@ -229,28 +238,29 @@ export async function buildGalleryList(options = {}) {
       output.entries.push({
         url: relativePath,
         id: slug,
-        title: title,
+        title: title!,
         thumbnail: thumbnailImage,
         sourceUrl: editSourceUrl,
         lineCount: lineCount,
-        description: description,
-        labels: labels,
+        description: description!,
+        labels: labelsArray,
       });
 
       await pagefindIndex.addHTMLFile(
         createGalleryRecord({
           id: slug,
           code: jsFile,
-          title,
-          description,
+          title: title!,
+          description: description!,
           image: thumbnailImage,
-          labels,
+          labels: labelsArray,
         }),
       );
     } catch (error) {
+      const err = error as Error;
       errors.push(
         new Error(
-          `Could not build gallery record for "${filePath}": ${error.message}`,
+          `Could not build gallery record for "${filePath}": ${err.message}`,
         ),
       );
       continue;
@@ -277,7 +287,7 @@ export async function buildGalleryList(options = {}) {
 
   // Copy all static gallery files
   const staticGalleryFiles = galleryFiles.filter(
-    (path) => !basename(path).match(galleryItemConfig),
+    (path: string) => !basename(path).match(galleryItemConfig),
   );
   try {
     for (const file of staticGalleryFiles) {
@@ -289,18 +299,21 @@ export async function buildGalleryList(options = {}) {
       await cp(file, destination, { recursive: true });
     }
   } catch (error) {
-    console.error(`Error copying gallery files: ${error.message}`);
+    const err = error as Error;
+    console.error(`Error copying gallery files: ${err.message}`);
   }
 
   return output;
 }
 
 // If running the script directly using node
-if (import.meta.url.endsWith(`${pathToFileURL(process.argv[1])}`)) {
-  const argv = yargs(hideBin(process.argv)).parse();
+if (import.meta.url.endsWith(`${pathToFileURL(process.argv[1]!)}`)) {
+  const argv = (await yargs(hideBin(process.argv)).parse()) as {
+    config?: string;
+  };
 
   const configPath = argv.config ?? join(__dirname, "../sandcastle.config.js");
-  let buildGalleryOptions;
+  let buildGalleryOptions: BuildGalleryOptions;
 
   try {
     const config = await import(pathToFileURL(configPath).href);
@@ -330,13 +343,14 @@ if (import.meta.url.endsWith(`${pathToFileURL(process.argv[1])}`)) {
       includeDevelopment,
     };
   } catch (error) {
-    console.error(`Could not read config file: ${error.message}`, {
+    const err = error as Error;
+    console.error(`Could not read config file: ${err.message}`, {
       cause: error,
     });
     exit(1);
   }
 
-  let output;
+  let output: GalleryList | undefined;
   try {
     output = await buildGalleryList(buildGalleryOptions);
     console.log("Successfully built gallery list.");

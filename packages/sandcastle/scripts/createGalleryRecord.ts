@@ -1,3 +1,12 @@
+interface GalleryRecordData {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  code: string;
+  labels: string[];
+}
+
 export function createRecordHtml({
   id,
   title,
@@ -5,7 +14,7 @@ export function createRecordHtml({
   image,
   code,
   labels,
-}) {
+}: GalleryRecordData): string {
   // Pagefind best indexes content in a hierarchical structure.
   // Heading levels and data-pagefind-weight attributes will factor into the search relevance.
   // Headings with id attributes are helpful for structuring the search subresults for highlighting.
@@ -16,25 +25,25 @@ export function createRecordHtml({
 
         <img id="thumbnail" src="${image}" alt="${title} thumbnail" />
 
-        <h2 id="description" 
-            data-pagefind-ignore>Description</h2> 
-        <p data-pagefind-meta="description" 
+        <h2 id="description"
+            data-pagefind-ignore>Description</h2>
+        <p data-pagefind-meta="description"
             data-pagefind-weight="5">${description}</p>
-        
-        <h2 id="labels" 
+
+        <h2 id="labels"
             data-pagefind-weight="0">Labels</h2>
         <ul data-pagefind-ignore>
         ${labels
           .map(
-            (label) =>
-              `<li data-pagefind-meta="labels" 
-                data-pagefind-filter="labels" 
+            (label: string) =>
+              `<li data-pagefind-meta="labels"
+                data-pagefind-filter="labels"
                 data-pagefind-weight="2">${label}</li>`,
           )
           .join("\n")}
         </ul>
 
-        <h2 id="code" 
+        <h2 id="code"
             data-pagefind-weight="0">Code</h2>
         <pre class="language-js">
             <code data-pagefind-meta="code" >
@@ -45,7 +54,10 @@ ${code}
 </html>`;
 }
 
-export function createGalleryRecord(galleryData) {
+export function createGalleryRecord(galleryData: GalleryRecordData): {
+  url: string;
+  content: string;
+} {
   return {
     url: `?id=${galleryData.id}`,
     content: createRecordHtml(galleryData),

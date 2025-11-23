@@ -10,20 +10,24 @@ import { buildGalleryList } from "../packages/sandcastle/scripts/buildGallery.js
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = join(__dirname, "..");
 
-// async function importSandcastleBuildFunctions() {
-//   // Import asynchronously, for now, because this script is not included or run in the release zip;
-//   const buildGalleryScriptPath = join(
-//     __dirname,
-//     "../packages/sandcastle/index.js",
-//   );
-//   return await import(pathToFileURL(buildGalleryScriptPath).href);
-// }
+interface SandcastleConfigOptions {
+  configPath: string;
+  root?: string;
+  gallery?: {
+    files?: string[];
+    defaultThumbnail?: string;
+    searchOptions?: Record<string, unknown>;
+    defaultFilters?: Record<string, unknown>;
+    metadata?: Record<string, unknown>;
+  };
+  sourceUrl?: string;
+  [key: string]: unknown;
+}
 
 /**
  * Parses Sandcastle config file and returns its values.
- * @returns {Promise<Record<string,any>>} A promise that resolves to the config values.
  */
-export async function getSandcastleConfig() {
+export async function getSandcastleConfig(): Promise<SandcastleConfigOptions> {
   const configPath = "packages/sandcastle/sandcastle.config.js";
   const configImportPath = join(projectRoot, configPath);
   const config = await import(pathToFileURL(configImportPath).href);
@@ -34,28 +38,26 @@ export async function getSandcastleConfig() {
   };
 }
 
+interface BuildSandcastleAppOptions {
+  outputToBuildDir?: boolean;
+  includeDevelopment?: boolean;
+}
+
 /**
  * Build the Sandcastle package out to static files in the repo for use in the local server
  * or deployments.
  *
- * If <code>outputToBuildDir</code> is true then all necessary static files for CesiumJS and assets
+ * If `outputToBuildDir` is true then all necessary static files for CesiumJS and assets
  * will be bundled with the sandcastle files in Build/Sandcastle2. Used to make deployments easier
  *
- * If <code>outputToBuildDir</code> is false then sandcastle will be built to Apps/Sandcastle2 with
+ * If `outputToBuildDir` is false then sandcastle will be built to Apps/Sandcastle2 with
  * relative paths to other top level cesium assets and built files. Used for local development and the zip file
- *
- * @param {object} options
- * @param {boolean} options.outputToBuildDir control whether sandcastle should be built and bundled together completely static into the Build directory
- * @param {boolean} options.includeDevelopment true if gallery items flagged as development should be included.
  */
 export async function buildSandcastleApp({
   outputToBuildDir,
   includeDevelopment,
-}) {
-  // const { join, dirname } = path;
+}: BuildSandcastleAppOptions): Promise<void> {
   const __dirname = dirname(fileURLToPath(import.meta.url));
-  // const { createSandcastleConfig, buildStatic } =
-  //   await importSandcastleBuildFunctions();
   const version = await getVersion();
   let config;
   if (outputToBuildDir) {
@@ -142,22 +144,23 @@ export async function buildSandcastleApp({
   });
 }
 
+interface BuildSandcastleGalleryOptions {
+  includeDevelopment?: boolean;
+  outputDir?: string;
+}
+
 /**
  * Indexes Sandcastle gallery files and writes gallery files to the configured Sandcastle output directory.
- * @param {object} options
- * @param {boolean} options.includeDevelopment true if gallery items flagged as development should be included.
- * @param {string} [options.outputDir] change the directory the gallery is built to. Defaults to /Apps/Sandcastle2
- * @returns {Promise<void>} A promise that resolves once the gallery files have been indexed and written.
  */
 export async function buildSandcastleGallery({
   includeDevelopment,
   outputDir = "../../Apps/Sandcastle2",
-}) {
+}: BuildSandcastleGalleryOptions): Promise<void> {
   const { configPath, root, gallery, sourceUrl } = await getSandcastleConfig();
 
-  // Use an absolute path to avoid any descrepency between working directories
+  // Use an absolute path to avoid any discrepancy between working directories
   // All other directories will be relative to the specified root directory
-  const rootDirectory = join(dirname(configPath), root);
+  const rootDirectory = join(dirname(configPath), root ?? ".");
 
   // Paths are specified relative to the config file
   const {
@@ -168,8 +171,6 @@ export async function buildSandcastleGallery({
     metadata,
   } = gallery ?? {};
 
-  // const { buildGalleryList } = await importSandcastleBuildFunctions();
-
   await buildGalleryList({
     rootDirectory,
     publicDirectory: outputDir,
@@ -177,7 +178,9 @@ export async function buildSandcastleGallery({
     sourceUrl,
     defaultThumbnail,
     searchOptions,
-    defaultFilters,
+    defaultFilters: defaultFilters as
+      | Record<string, string | string[]>
+      | undefined,
     metadata,
     includeDevelopment,
   });

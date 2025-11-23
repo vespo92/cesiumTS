@@ -1,4 +1,4 @@
-import { build, defineConfig } from "vite";
+import { build, defineConfig, type UserConfig, type LogLevel, type Plugin } from "vite";
 import baseConfig from "../vite.config.js";
 import { fileURLToPath } from "url";
 import { viteStaticCopy } from "vite-plugin-static-copy";
@@ -6,30 +6,35 @@ import { dirname, join } from "path";
 import { cesiumPathReplace, insertImportMap } from "../vite-plugins.js";
 import typescriptCompile from "./typescriptCompile.js";
 
-/** @import { UserConfig, LogLevel } from 'vite' */
+interface ImportObject {
+  path: string;
+  typesPath: string;
+}
 
-/**
- * @typedef {Object} ImportObject
- * @property {string} path The path to use for the import map. ie the path the app can expect to find this at
- * @property {string} typesPath The path to use for intellisense types in monaco
- */
+type ImportList = Record<string, ImportObject>;
 
-/**
- * @typedef {Object<string, ImportObject>} ImportList
- */
-
-/**
- * Check if the given key is in the imports list and throw an error if not
- * @param {ImportList} imports
- * @param {string} name
- */
-function checkForImport(imports, name) {
+function checkForImport(imports: ImportList, name: string): void {
   if (!imports[name]) {
     throw new Error(`Missing import for ${name}`);
   }
 }
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+interface CopyTarget {
+  src: string;
+  dest: string;
+}
+
+interface SandcastleConfigOptions {
+  outDir: string;
+  basePath: string;
+  cesiumBaseUrl: string;
+  cesiumVersion: string;
+  commitSha?: string;
+  imports: ImportList;
+  copyExtraFiles?: CopyTarget[];
+}
 
 /**
  * Create the Vite configuration for building Sandcastle.
@@ -38,15 +43,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
  * Most importantly specify the paths the app can find the library imports.
  *
  * If you are copying files to the built directory ensure the source files exist BEFORE attempting to build Sandcastle
- *
- * @param {object} options
- * @param {string} options.outDir Path to build files into
- * @param {string} options.basePath Base path for files/routes
- * @param {string} options.cesiumBaseUrl Base path for CesiumJS. This should include the CesiumJS assets and workers etc.
- * @param {string} options.cesiumVersion CesiumJS version to display in the top right
- * @param {string} [options.commitSha] Optional commit hash to display in the top right of the application
- * @param {ImportList} options.imports Set of imports to add to the import map for the iframe and standalone html pages. These paths should match the URL where it can be accessed within the current environment.
- * @param {{src: string, dest: string}[]} [options.copyExtraFiles] Extra paths passed to viteStaticCopy. Use this to consolidate files for a singular static deployment (ie during production). Source paths should be absolute, dest paths should be relative to the page root. It is up to you to ensure these files exist BEFORE building sandcastle.
  */
 export function createSandcastleConfig({
   outDir,
@@ -56,13 +52,12 @@ export function createSandcastleConfig({
   commitSha,
   imports,
   copyExtraFiles = [],
-}) {
+}: SandcastleConfigOptions): UserConfig {
   if (!cesiumVersion || cesiumVersion === "") {
     throw new Error("Must provide a CesiumJS version");
   }
 
-  /** @type {UserConfig} */
-  const config = { ...baseConfig };
+  const config: UserConfig = { ...baseConfig };
 
   config.base = basePath;
 
@@ -87,12 +82,10 @@ export function createSandcastleConfig({
     );
   }
 
-  /** @type {Object<string, string>} */
-  const importMap = {
+  const importMap: Record<string, string> = {
     Sandcastle: "../templates/Sandcastle.js",
   };
-  /** @type {Object<string, string>} */
-  const typePaths = {
+  const typePaths: Record<string, string> = {
     Sandcastle: "../templates/Sandcastle.d.ts",
   };
   for (const [key, value] of Object.entries(imports)) {
@@ -107,7 +100,7 @@ export function createSandcastleConfig({
     __COMMIT_SHA__: JSON.stringify(commitSha ?? undefined),
   };
 
-  const plugins = config.plugins ?? [];
+  const plugins = (config.plugins ?? []) as Plugin[];
   config.plugins = [
     ...plugins,
     copyPlugin,
@@ -115,21 +108,20 @@ export function createSandcastleConfig({
     insertImportMap(importMap, ["bucket.html", "standalone.html"]),
   ];
 
-  return defineConfig(config);
+  return defineConfig(config) as UserConfig;
 }
 
 /**
  * Build Sandcastle out to a specified location as static files.
- * The config should be generated with the <code>createSandcastleConfig</code> function.
+ * The config should be generated with the `createSandcastleConfig` function.
  *
  * The build will only set up the paths for "external" resources from the app.
  * If you are copying files to the built directory ensure the source files exist BEFORE attempting to build Sandcastle
- *
- * @param {UserConfig} config
- * @param {LogLevel} logLevel
- * @returns {Promise<void>}
  */
-export async function buildStatic(config, logLevel = "warn") {
+export async function buildStatic(
+  config: UserConfig,
+  logLevel: LogLevel = "warn",
+): Promise<void> {
   // We have to do the compile for the Sandcastle API outside of the vite build
   // because we need to reference the js file and types directly from the app
   // and we don't want them bundled with the rest of the code

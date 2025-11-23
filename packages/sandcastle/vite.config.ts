@@ -1,14 +1,12 @@
 import { fileURLToPath } from "url";
 import react from "@vitejs/plugin-react";
 import { dirname, resolve } from "path";
-
-/** @import {UserConfig} from 'vite' */
+import type { UserConfig } from "vite";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // https://vite.dev/config/
-/** @type {UserConfig} */
-const baseConfig = {
+const baseConfig: UserConfig = {
   plugins: [react()],
   server: {
     // Given the nature of loading and constructing a CesiumJS Viewer on startup HMR can get memory intensive
@@ -30,7 +28,10 @@ const baseConfig = {
         standalone: resolve(__dirname, "./standalone.html"),
       },
     },
-    assetsInlineLimit: (filePath) => {
+    assetsInlineLimit: (
+      filePath: string,
+      _content: Buffer,
+    ): boolean | undefined => {
       if (filePath.includes("@stratakit") && filePath.endsWith(".svg")) {
         return false;
       }
@@ -38,7 +39,10 @@ const baseConfig = {
     },
   },
   experimental: {
-    renderBuiltUrl(filename, { hostId }) {
+    renderBuiltUrl(
+      filename: string,
+      { hostId }: { hostId: string },
+    ): string | undefined {
       // the standalone.html file needs to stay at the root path
       // for legacy reasons however the <base> tag makes it behave
       // as if it's nested inside the `/templates/` directory.
@@ -46,6 +50,7 @@ const baseConfig = {
       if (hostId.endsWith("standalone.html")) {
         return `../${filename}`;
       }
+      return undefined;
     },
   },
 };

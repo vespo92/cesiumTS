@@ -18,7 +18,10 @@
   ],
   "include": [
     "scripts/**/*.ts",
-    "types/**/*.ts"
+    "types/**/*.ts",
+    "types/**/*.d.ts",
+    "packages/sandcastle/scripts/**/*.ts",
+    "packages/sandcastle/vite*.ts"
   ],
   "exclude": [
     "node_modules",
@@ -26,6 +29,9 @@
     "Source",
     "Specs",
     "Documentation",
-    "packages/*/node_modules"
+    "packages/*/node_modules",
+    "packages/sandcastle/gallery",
+    "packages/sandcastle/src",
+    "packages/sandcastle/templates"
   ]
 }

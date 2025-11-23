@@ -21,7 +21,10 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const inputDirectory = join(__dirname, "../../../Apps/Sandcastle/gallery");
 const outputDirectory = join(__dirname, "../gallery");
 
-async function convertSandcastle(path, developerOnly = false) {
+async function convertSandcastle(
+  path: string,
+  developerOnly: boolean = false,
+): Promise<void> {
   const htmlFile = readFileSync(path, "utf-8");
   const { document } = new JSDOM(htmlFile, {
     url: "https://example.com",
@@ -36,16 +39,20 @@ async function convertSandcastle(path, developerOnly = false) {
 
   console.log(`processing ${developerOnly ? "dev" : ""}`, slug);
 
-  let title = document.title;
+  let title: string = document.title;
   if (title === "Cesium Demo") {
     title = name;
   }
-  const labelsMeta = document.querySelector(
-    "meta[name=cesium-sandcastle-labels]",
+  const labelsMeta = (
+    document.querySelector(
+      "meta[name=cesium-sandcastle-labels]",
+    ) as HTMLMetaElement | null
   )?.content;
-  const description = document.querySelector("meta[name=description]")?.content;
+  const description = (
+    document.querySelector("meta[name=description]") as HTMLMetaElement | null
+  )?.content;
 
-  const labels = labelsMeta.split(",").map((s) => s.trim());
+  const labels = (labelsMeta ?? "").split(",").map((s: string) => s.trim());
   if (developerOnly && !labels.includes("Development")) {
     labels.push("Development");
   }
@@ -65,7 +72,9 @@ async function convertSandcastle(path, developerOnly = false) {
     plugins: [babelPlugin, estreePlugin],
   });
 
-  document.body.removeChild(scriptElem);
+  if (scriptElem) {
+    document.body.removeChild(scriptElem);
+  }
   const html = document.body.innerHTML;
   const formattedHtml = await prettier.format(html, {
     parser: "html",
@@ -104,7 +113,7 @@ async function convertSandcastle(path, developerOnly = false) {
   }
 }
 
-async function main() {
+async function main(): Promise<void> {
   const htmlFiles = globbySync([`${inputDirectory}/*.html`]);
 
   for (const file of htmlFiles) {
