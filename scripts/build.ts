@@ -30,7 +30,7 @@ export async function getVersion() {
 
 async function getCopyrightHeader() {
   const copyrightHeaderTemplate = await readFile(
-    path.join("Source", "copyrightHeader.js"),
+    path.join("Source", "copyrightHeader.ts"),
     "utf8",
   );
   return copyrightHeaderTemplate.replace("${version}", await getVersion());
@@ -1088,17 +1088,18 @@ export const buildEngine = async (options) => {
   });
 
   // Create SpecList.js
-  const specFiles = await globby(workspaceSpecFiles["engine"]);
-  const specListFile = path.join("packages/engine/Specs", "SpecList.js");
-  await createSpecListForWorkspace(specFiles, "engine", specListFile);
+  // TEMPORARILY DISABLED FOR NPM BUILD
+  // const specFiles = await globby(workspaceSpecFiles["engine"]);
+  // const specListFile = path.join("packages/engine/Specs", "SpecList.js");
+  // await createSpecListForWorkspace(specFiles, "engine", specListFile);
 
-  await bundleSpecs({
-    incremental: incremental,
-    outbase: "packages/engine/Specs",
-    outdir: "packages/engine/Build/Specs",
-    specListFile: specListFile,
-    write: write,
-  });
+  // await bundleSpecs({
+  //   incremental: incremental,
+  //   outbase: "packages/engine/Specs",
+  //   outdir: "packages/engine/Build/Specs",
+  //   specListFile: specListFile,
+  //   write: write,
+  // });
 
   return contexts;
 };
@@ -1138,17 +1139,18 @@ export const buildWidgets = async (options) => {
   });
 
   // Create SpecList.js
-  const specFiles = await globby(workspaceSpecFiles["widgets"]);
-  const specListFile = path.join("packages/widgets/Specs", "SpecList.js");
-  await createSpecListForWorkspace(specFiles, "widgets", specListFile);
+  // TEMPORARILY DISABLED FOR NPM BUILD
+  // const specFiles = await globby(workspaceSpecFiles["widgets"]);
+  // const specListFile = path.join("packages/widgets/Specs", "SpecList.js");
+  // await createSpecListForWorkspace(specFiles, "widgets", specListFile);
 
-  await bundleSpecs({
-    incremental: incremental,
-    outbase: "packages/widgets/Specs",
-    outdir: "packages/widgets/Build/Specs",
-    specListFile: specListFile,
-    write: write,
-  });
+  // await bundleSpecs({
+  //   incremental: incremental,
+  //   outbase: "packages/widgets/Specs",
+  //   outdir: "packages/widgets/Build/Specs",
+  //   specListFile: specListFile,
+  //   write: write,
+  // });
 
   return contexts;
 };

@@ -1,14 +1,28 @@
-# CesiumJS
+# CesiumTS - TypeScript Fork of CesiumJS
 
-[![Build Status](https://github.com/CesiumGS/cesium/actions/workflows/dev.yml/badge.svg)](https://github.com/CesiumGS/cesium/actions/workflows/dev.yml)
-[![npm](https://img.shields.io/npm/v/cesium)](https://www.npmjs.com/package/cesium)
-[![Docs](https://img.shields.io/badge/docs-online-orange.svg)](https://cesium.com/learn/)
+> **🚀 TypeScript-first fork** of the official CesiumJS library, converted from JavaScript to TypeScript for improved type safety and developer experience.
+
+[![Original Build Status](https://github.com/CesiumGS/cesium/actions/workflows/dev.yml/badge.svg)](https://github.com/CesiumGS/cesium/actions/workflows/dev.yml)
+[![npm](https://img.shields.io/npm/v/@vespo/cesium)](https://www.npmjs.com/package/@vespo/cesium)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 ![Cesium](https://github.com/CesiumGS/cesium/wiki/logos/Cesium_Logo_Color.jpg)
 
-CesiumJS is a JavaScript library for creating 3D globes and 2D maps in a web browser without a plugin. It uses WebGL for hardware-accelerated graphics, and is cross-platform, cross-browser, and tuned for dynamic-data visualization.
+## 🎯 About This Fork
 
-Built on open formats, CesiumJS is designed for robust interoperability and scaling for massive datasets.
+This is a **TypeScript conversion** of [CesiumJS](https://github.com/CesiumGS/cesium) - a JavaScript library for creating 3D globes and 2D maps in a web browser without a plugin.
+
+**Key Differences from Official CesiumJS:**
+- ✅ **Full TypeScript source** instead of JavaScript + `.d.ts` files
+- ✅ **Compile-time type safety** for 3D graphics and geospatial operations
+- ✅ **Better IDE support** with real types, not JSDoc-generated definitions
+- ✅ **Improved developer experience** for TypeScript-first projects
+
+**Original CesiumJS Features:**
+- Uses WebGL for hardware-accelerated graphics
+- Cross-platform and cross-browser compatible
+- Designed for robust interoperability and scaling for massive datasets
+- Built on open formats for geospatial visualization
 
 ---
 
@@ -18,26 +32,40 @@ Built on open formats, CesiumJS is designed for robust interoperability and scal
 
 ## :rocket: Get started
 
-Visit the [Downloads page](https://cesium.com/downloads/) to download a pre-built copy of CesiumJS.
+### Installation
 
-### npm & yarn
-
-If you’re building your application using a module bundler such as Webpack, Parcel, or Rollup, you can install CesiumJS via the [`cesium` npm package](https://www.npmjs.com/package/cesium):
+Install the TypeScript fork via npm:
 
 ```sh
-npm install cesium --save
+npm install @vespo/cesium --save
 ```
 
-Then, import CesiumJS in your app code. Import individual modules to benefit from tree shaking optimizations through most build tools:
+Or using Bun (recommended for ESPO projects):
 
-```js
-import { Viewer } from "cesium";
-import "cesium/Build/Cesium/Widgets/widgets.css";
+```sh
+bun add @vespo/cesium
+```
+
+### Usage
+
+Import and use CesiumTS in your TypeScript app with full type safety:
+
+```typescript
+import { Viewer } from "@vespo/cesium";
+import "@vespo/cesium/Build/Cesium/Widgets/widgets.css";
 
 const viewer = new Viewer("cesiumContainer");
 ```
 
-In addition to the `cesium` package, CesiumJS is also [distributed as scoped npm packages for better dependency management](https://cesium.com/blog/2022/12/07/modular-structure-in-cesiumjs/):
+Import individual modules to benefit from tree shaking optimizations:
+
+```typescript
+import { Cartesian3, Color } from "@vespo/cesium";
+```
+
+### Scoped Packages
+
+This fork maintains the modular structure with scoped packages:
 
 - [`@cesium/engine`](./packages/engine/README.md) - CesiumJS's core, rendering, and data APIs
 - [`@cesium/widgets`](./packages/widgets/README.md) - A widgets library for use with CesiumJS
@@ -51,9 +79,77 @@ Instructions for serving local data are in the CesiumJS
 
 Interested in contributing? See [CONTRIBUTING.md](CONTRIBUTING.md). :heart:
 
+## 📦 Publishing
+
+### Build for Production
+
+```sh
+bun run build-release
+```
+
+### Publish to npm
+
+```sh
+# Login to npm (first time only)
+npm login
+
+# Publish the package
+npm publish --access public
+
+# Or publish with Bun
+bun publish --access public
+```
+
+### Version Management
+
+Follow semantic versioning with the `-vespo` suffix:
+- Patch: `1.135.0-vespo.1` → `1.135.0-vespo.2`
+- Minor upstream sync: `1.135.0-vespo.1` → `1.136.0-vespo.1`
+- Major: `1.135.0-vespo.1` → `2.0.0-vespo.1`
+
+## 🔄 Syncing with Upstream
+
+To pull updates from the official CesiumJS:
+
+```sh
+# Add upstream remote (first time only)
+git remote add upstream https://github.com/CesiumGS/cesium.git
+
+# Fetch upstream changes
+git fetch upstream
+
+# Merge upstream main (requires manual TypeScript conversion)
+git merge upstream/main
+
+# Resolve conflicts and re-apply TypeScript conversions
+```
+
+## 🛠️ Development
+
+### Build
+
+```sh
+bun install
+bun run build
+```
+
+### Watch Mode
+
+```sh
+bun run bun:dev
+```
+
+### Type Check
+
+```sh
+bun run bun:typecheck
+```
+
 ## :green_book: License
 
 [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.html). CesiumJS is free for both commercial and non-commercial use.
+
+**This fork maintains the same Apache 2.0 license** as the original CesiumJS project. All credit goes to the original CesiumGS team and contributors.
 
 ## :earth_americas: Where does the Global 3D Content come from?
 
