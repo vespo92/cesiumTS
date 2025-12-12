@@ -24,7 +24,7 @@ import {
   glslToJavaScript,
   createCombinedSpecList,
   createJsHintOptions,
-} from "./scripts/build.js";
+} from "./scripts/build.ts";
 
 // Determines the scope of the workspace packages. If the scope is set to cesium, the workspaces should be @cesium/engine.
 // This should match the scope of the dependencies of the root level package.json.

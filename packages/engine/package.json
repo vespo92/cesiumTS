@@ -1,7 +1,7 @@
 {
-  "name": "@cesium/engine",
-  "version": "22.0.0",
-  "description": "CesiumJS is a JavaScript library for creating 3D globes and 2D maps in a web browser without a plugin.",
+  "name": "@vespo/cesium-engine",
+  "version": "1.135.0-vespo.1",
+  "description": "TypeScript 3D engine for creating globes and maps - GPU-optimized for Apple Silicon and modern hardware.",
   "keywords": [
     "3D",
     "webgl",
