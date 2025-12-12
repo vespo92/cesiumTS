@@ -40,7 +40,7 @@ Install the TypeScript fork via npm:
 npm install @vespo/cesium --save
 ```
 
-Or using Bun (recommended for ESPO projects):
+Or using Bun (faster alternative):
 
 ```sh
 bun add @vespo/cesium
