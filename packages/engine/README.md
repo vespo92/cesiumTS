@@ -1,56 +1,31 @@
-# @cesium/engine
+# @vespo/cesium-engine
 
-[![Build Status](https://github.com/CesiumGS/cesium/actions/workflows/dev.yml/badge.svg)](https://github.com/CesiumGS/cesium/actions/workflows/dev.yml)
-[![npm](https://img.shields.io/npm/v/@cesium/engine)](https://www.npmjs.com/package/@cesium/engine)
-[![Docs](https://img.shields.io/badge/docs-online-orange.svg)](https://cesium.com/learn/)
+TypeScript 3D rendering engine for creating interactive globes and maps. GPU-optimized for modern hardware including Apple Silicon.
 
-![Cesium](https://github.com/CesiumGS/cesium/wiki/logos/Cesium_Logo_Color.jpg)
+## Features
 
-[CesiumJS](../../README.md) is a JavaScript library for creating 3D globes and 2D maps in a web browser without a plugin. It uses WebGL for hardware-accelerated graphics, and is cross-platform, cross-browser, and tuned for dynamic-data visualization.
+- WebGL-based 3D globe rendering
+- Terrain and imagery streaming
+- GLSL shader pipeline for GPU acceleration
+- Full TypeScript type safety
+- Optimized for Apple M-series GPUs
 
-`@cesium/engine` includes cesiumJS's core, rendering, and data APIs. Here you'll find terrain and imagery engines, support for 3D Tiles and 3D models, geometries, and vector data.
+## Installation
 
----
-
-[**Examples**](https://sandcastle.cesium.com/) :earth_asia: [**Docs**](https://cesium.com/learn/cesiumjs-learn/) :earth_americas: [**Website**](https://cesium.com/cesiumjs) :earth_africa: [**Forum**](https://community.cesium.com/) :earth_asia: [**User Stories**](https://cesium.com/user-stories/)
-
----
-
-## Install
-
-`@cesium/engine` is published as ES modules with full typing support.
-
-Install with npm:
-
-```sh
-npm install @cesium/engine --save
-```
-
-Or, install with yarn:
-
-```sh
-yarn add @cesium/engine
+```bash
+npm install @vespo/cesium-engine
+# or
+bun add @vespo/cesium-engine
 ```
 
 ## Usage
 
-Import individual modules to benefit from tree shaking optimizations through most build tools:
+```typescript
+import { Viewer } from '@vespo/cesium-engine';
 
-```js
-import { CesiumWidget } from "@cesium/engine";
-import "@cesium/engine/Source/Widget/CesiumWidget.css";
-
-const cesiumWidget = new CesiumWidget("cesiumContainer");
+const viewer = new Viewer('cesiumContainer');
 ```
-
-See our [Quickstart Guide](https://cesium.com/learn/cesiumjs-learn/cesiumjs-quickstart/) for more information on getting a CesiumJS app up and running.
-
-## Community
-
-Have questions? Ask them on the [community forum](https://community.cesium.com/).
-
-Interested in contributing? See [CONTRIBUTING.md](../../CONTRIBUTING.md). :heart:
 
 ## License
 
-[Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.html). CesiumJS is free for both commercial and non-commercial use.
+Apache 2.0 - Fork of CesiumJS with TypeScript conversion
