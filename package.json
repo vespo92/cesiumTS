@@ -164,6 +164,7 @@
     "prettier-check": "prettier --check \"**/*\"",
     "cspell": "npx cspell lint -c .vscode/cspell.json --unique --no-progress"
   },
+  "packageManager": "bun@1.2.20",
   "engines": {
     "node": ">=20.19.0"
   },
